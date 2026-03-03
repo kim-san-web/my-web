@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> KIMSAN | Digital </title>
+    <!-- Tailwind CSS with custom configuration -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { 50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 800: '#3730a3', 900: '#312e81', 950: '#1e1b4b' },
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'blob': 'blob 7s infinite',
+                    },
+                    keyframes: {
+                        'float': {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' }
+                        },
+                        'blob': {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 10px; }
+
+        /* Animation States */
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* SPA Transition */
+        .page-view { display: none; opacity: 0; transform: scale(0.98); transition: all 0.4s ease-out; }
+        .page-view.active { display: block; opacity: 1; transform: scale(1); }
+
+        /* Accordion Logic */
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .accordion-item.active .accordion-content { max-height: 500px; padding-bottom: 24px; }
+        .accordion-item.active .accordion-icon { transform: rotate(180deg); }
+
+        /* Mobile Overlay Logic */
+        #mobile-menu-overlay { transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        #mobile-menu-overlay.active { transform: translateX(0); }
+
+        /* Nav Glassmorphism on Scroll */
+        .nav-scrolled { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-color: rgba(0,0,0,0.1); padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .dark .nav-scrolled { background: rgba(15, 23, 42, 0.85); border-color: rgba(255,255,255,0.05); }
+    </style>
+</head>
+<body class="bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobile-menu-overlay" class="fixed inset-0 z-[60] bg-white dark:bg-slate-950 p-8 md:hidden">
+        <div class="flex justify-between items-center mb-16">
+            <span class="text-2xl font-black tracking-tighter">KIMSAN</span>
+            <button onclick="DevApp.toggleMobileMenu()" class="p-3 bg-slate-100 dark:bg-slate-800 rounded-full">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <nav class="space-y-8">
+            <a href="#" onclick="DevApp.navigate('home')" class="block text-4xl font-black">Home</a>
+            <a href="#" onclick="DevApp.navigate('about')" class="block text-4xl font-black">About</a>
+            <div class="pt-4 space-y-4 border-t border-slate-100 dark:border-slate-800">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Expertise</span>
+                <a href="#" onclick="DevApp.navigate('service-dev')" class="block text-xl font-bold">Engineering</a>
+                <a href="#" onclick="DevApp.navigate('service-design')" class="block text-xl font-bold">Product</a>
+                <a href="#" onclick="DevApp.navigate('pricing')" class="block text-xl font-bold">Pricing</a>
+            </div>
+            <button onclick="DevApp.scrollToContact()" class="w-full bg-primary-600 text-white py-5 rounded-2xl font-bold text-xl mt-12 shadow-xl shadow-primary-500/20">Hire Us</button>
+        </nav>
+    </div>
+
+    <!-- Main Global Header -->
+    <header id="main-nav" class="fixed top-0 w-full z-50 transition-all duration-300 py-6">
+        <div class="max-w-7xl mx-auto px-4">
+            <nav class="flex items-center justify-between border-b border-transparent px-4 py-2">
+                <a href="#" onclick="DevApp.navigate('home')" class="flex items-center group">
+                    <div class="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center mr-3 group-hover:rotate-12 transition-transform">
+                        <span class="text-white font-black">D.</span>
+                    </div>
+                    <span class="text-xl font-black tracking-tighter">KIMSAN</span>
+                </a>
+
+                <!-- Desktop Nav -->
+                <div class="hidden md:flex items-center space-x-10">
+                    <a href="#" onclick="DevApp.navigate('home')" class="text-sm font-bold opacity-70 hover:opacity-100 transition-opacity">Home</a>
+                    <a href="#" onclick="DevApp.navigate('about')" class="text-sm font-bold opacity-70 hover:opacity-100 transition-opacity">About</a>
+                    <div class="relative group">
+                        <button class="text-sm font-bold opacity-70 hover:opacity-100 transition-opacity flex items-center">
+                            Solutions <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all p-3">
+                            <a href="#" onclick="DevApp.navigate('service-dev')" class="block p-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-sm font-bold">Development</a>
+                            <a href="#" onclick="DevApp.navigate('service-design')" class="block p-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-sm font-bold">UX/UI Design</a>
+                        </div>
+                    </div>
+                    <a href="#" onclick="DevApp.navigate('pricing')" class="text-sm font-bold opacity-70 hover:opacity-100 transition-opacity">Pricing</a>
+                    
+                    <!-- Theme Toggle -->
+                    <button id="theme-btn" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:scale-105 active:scale-95 transition-all">
+                        <svg id="sun-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        <svg id="moon-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                    </button>
+                    
+                    <a href="#" onclick="DevApp.scrollToContact()" class="bg-primary-600 text-white px-6 py-2.5 rounded-xl text-sm font-black hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-500/20 transition-all">Get Started</a>
+                </div>
+
+                <button onclick="DevApp.toggleMobileMenu()" class="md:hidden p-2 text-slate-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- CONTENT VIEWS -->
+    <main id="view-container">
+        
+        <!-- HOME VIEW -->
+        <section id="view-home" class="page-view active">
+            <div class="min-h-screen flex items-center relative overflow-hidden pt-20">
+                <!-- BG Decorations -->
+                <div class="absolute -top-24 -left-24 w-96 h-96 bg-primary-400/20 rounded-full blur-[100px] animate-blob"></div>
+                <div class="absolute top-1/2 -right-24 w-72 h-72 bg-purple-400/20 rounded-full blur-[80px] animate-blob" style="animation-delay: 2s"></div>
+                
+                <div class="max-w-7xl mx-auto px-4 w-full grid lg:grid-cols-2 gap-16 items-center">
+                    <div class="reveal active">
+                        <div class="inline-block bg-primary-100 dark:bg-primary-950 px-4 py-2 rounded-full mb-8">
+                            <span class="text-primary-600 dark:text-primary-400 text-xs font-black uppercase tracking-widest">Industry Leading Engineering</span>
+                        </div>
+                        <h1 class="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] mb-10">
+                            Build <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-indigo-500">Fast.</span><br>Scale <span class="text-slate-400">Better.</span>
+                        </h1>
+                        <p class="text-lg md:text-xl text-slate-500 dark:text-slate-400 max-w-lg mb-12 font-medium">
+                            We provide high-end development and design for venture-backed startups and established enterprises.
+                        </p>
+                        <div class="flex flex-wrap gap-4">
+                            <button onclick="DevApp.navigate('service-dev')" class="bg-primary-600 text-white px-10 py-5 rounded-2xl font-black text-lg shadow-xl shadow-primary-500/20 hover:-translate-y-1 transition-all active:scale-95">Work With Us</button>
+                            <button onclick="DevApp.navigate('pricing')" class="bg-slate-100 dark:bg-slate-900 px-10 py-5 rounded-2xl font-black text-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-all">View Pricing</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Visual Mockup -->
+                    <div class="relative hidden lg:block reveal">
+                        <div class="bg-slate-100 dark:bg-slate-900 rounded-[3rem] p-8 shadow-2xl border border-white/20 animate-float">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="h-32 bg-primary-500/10 rounded-2xl border border-primary-500/20"></div>
+                                <div class="h-32 bg-slate-200 dark:bg-slate-800 rounded-2xl"></div>
+                                <div class="h-64 col-span-2 bg-gradient-to-br from-primary-600 to-indigo-600 rounded-2xl flex items-center justify-center">
+                                    <svg class="w-20 h-20 text-white/20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Client Logos -->
+            <div class="py-12 border-y border-slate-100 dark:border-slate-900 bg-slate-50/50 dark:bg-slate-950">
+                <div class="max-w-7xl mx-auto px-4 flex flex-wrap justify-between items-center gap-8 grayscale opacity-50">
+                    <span class="text-2xl font-bold italic tracking-tighter">VOLT</span>
+                    <span class="text-2xl font-bold italic tracking-tighter">PHASE</span>
+                    <span class="text-2xl font-bold italic tracking-tighter">ORBITAL</span>
+                    <span class="text-2xl font-bold italic tracking-tighter">LUMINA</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABOUT VIEW -->
+        <section id="view-about" class="page-view pt-32 pb-20">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="reveal active mb-20">
+                    <h2 class="text-6xl font-black tracking-tight mb-8">The Studio.</h2>
+                    <p class="text-2xl text-slate-500 max-w-3xl leading-relaxed">We are a distributed team of engineers and designers who believe that software should be beautiful, accessible, and blindingly fast.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-12">
+                    <div class="bg-slate-50 dark:bg-slate-900 p-12 rounded-[3rem] reveal">
+                        <h3 class="text-3xl font-black mb-6">Our Philosophy</h3>
+                        <p class="text-slate-500 mb-8">We don't build features; we build solutions. Every line of code and every pixel is intentional, designed to move the needle for your business.</p>
+                        <div class="space-y-4">
+                            <div class="flex items-center font-bold"><div class="w-2 h-2 bg-primary-600 rounded-full mr-3"></div> Performance Obsessed</div>
+                            <div class="flex items-center font-bold"><div class="w-2 h-2 bg-primary-600 rounded-full mr-3"></div> User Centric Design</div>
+                            <div class="flex items-center font-bold"><div class="w-2 h-2 bg-primary-600 rounded-full mr-3"></div> Radical Transparency</div>
+                        </div>
+                    </div>
+                    <div class="relative reveal">
+                        <div class="absolute inset-0 bg-primary-600 rounded-[3rem] rotate-3 opacity-10"></div>
+                        <div class="bg-slate-200 dark:bg-slate-800 rounded-[3rem] h-full overflow-hidden flex items-center justify-center p-20">
+                             <svg class="w-full h-full text-slate-300 dark:text-slate-700" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRICING VIEW -->
+        <section id="view-pricing" class="page-view pt-32 pb-20">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="text-center mb-20 reveal active">
+                    <h2 class="text-5xl md:text-7xl font-black mb-6 tracking-tighter">Fair Pricing.</h2>
+                    <p class="text-xl text-slate-500 max-w-2xl mx-auto">Scale your development power without the overhead of full-time hiring.</p>
+                </div>
+
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <!-- Basic -->
+                    <div class="bg-white dark:bg-slate-900 p-10 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 reveal">
+                        <div class="text-primary-600 font-black mb-2">STARTER</div>
+                        <div class="text-5xl font-black mb-8 tracking-tighter">$4,999<span class="text-sm font-bold text-slate-400">/mo</span></div>
+                        <p class="text-sm text-slate-500 mb-8 leading-relaxed">Perfect for early stage startups needing consistent UI/UX or small feature iterations.</p>
+                        <ul class="space-y-4 mb-10">
+                            <li class="flex items-center text-sm font-bold"><svg class="w-4 h-4 mr-2 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M5 13l4 4L19 7"/></svg> One request at a time</li>
+                            <li class="flex items-center text-sm font-bold"><svg class="w-4 h-4 mr-2 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M5 13l4 4L19 7"/></svg> 48h avg. turnaround</li>
+                            <li class="flex items-center text-sm font-bold"><svg class="w-4 h-4 mr-2 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M5 13l4 4L19 7"/></svg> Slack communication</li>
+                        </ul>
+                        <button onclick="DevApp.scrollToContact()" class="w-full py-5 bg-slate-100 dark:bg-slate-800 rounded-2xl font-black hover:bg-primary-600 hover:text-white transition-all">Get Started</button>
+                    </div>
+
+                    <!-- Growth -->
+                    <div class="bg-slate-900 text-white p-10 rounded-[2.5rem] border-4 border-primary-600 shadow-2xl scale-105 relative z-10 reveal">
+                        <div class="absolute -top-5 left-1/2 -translate-x-1/2 bg-primary-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest">Most Popular</div>
+                        <div class="text-primary-400 font-black mb-2 uppercase">Growth Plan</div>
+                        <div class="text-5xl font-black mb-8 tracking-tighter">$8,999<span class="text-sm font-bold text-slate-400">/mo</span></div>
+                        <p class="text-sm text-slate-400 mb-8 leading-relaxed">Dedicated engineering for growing businesses needing complex backend and frontend integration.</p>
+                        <ul class="space-y-4 mb-10">
+                            <li class="flex items-center text-sm font-bold"><svg class="w-4 h-4 mr-2 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M5 13l4 4L19 7"/></svg> Two concurrent requests</li>
+                            <li class="flex items-center text-sm font-bold"><svg class="w-4 h-4 mr-2 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M5 13l4 4L19 7"/></svg> Same-day feedback</li>
+                            <li class="flex items-center text-sm font-bold"><svg class="w-4 h-4 mr-2 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M5 13l4 4L19 7"/></svg> Weekly strategy syncs</li>
+                        </ul>
+                        <button onclick="DevApp.scrollToContact()" class="w-full py-5 bg-primary-600 text-white rounded-2xl font-black hover:bg-primary-500 transition-all shadow-xl shadow-primary-500/20">Subscribe Now</button>
+                    </div>
+
+                    <!-- Enterprise -->
+                    <div class="bg-white dark:bg-slate-900 p-10 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 reveal">
+                        <div class="text-slate-400 font-black mb-2">CUSTOM</div>
+                        <div class="text-5xl font-black mb-8 tracking-tighter">Enterprise</div>
+                        <p class="text-sm text-slate-500 mb-8 leading-relaxed">Bespoke technical partnership for organizations requiring SOC2, dedicated teams, and 24/7 SLAs.</p>
+                        <ul class="space-y-4 mb-10">
+                            <li class="flex items-center text-sm font-bold"><svg class="w-4 h-4 mr-2 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M5 13l4 4L19 7"/></svg> Unlimited scope scale</li>
+                            <li class="flex items-center text-sm font-bold"><svg class="w-4 h-4 mr-2 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M5 13l4 4L19 7"/></svg> White-glove management</li>
+                            <li class="flex items-center text-sm font-bold"><svg class="w-4 h-4 mr-2 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M5 13l4 4L19 7"/></svg> Custom SLA support</li>
+                        </ul>
+                        <button onclick="DevApp.scrollToContact()" class="w-full py-5 bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 rounded-2xl font-black hover:opacity-80 transition-all">Talk to Sales</button>
+                    </div>
+                </div>
+
+                <!-- FAQ Integration -->
+                <div class="mt-40 max-w-3xl mx-auto">
+                    <h3 class="text-4xl font-black mb-12 text-center tracking-tight">Got Questions?</h3>
+                    <div class="space-y-4">
+                        <div class="accordion-item bg-slate-50 dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-100 dark:border-slate-800">
+                            <button class="w-full flex items-center justify-between p-8 font-bold text-lg text-left" onclick="DevApp.toggleAccordion(this)">
+                                <span>Can I pause or cancel my subscription?</span>
+                                <svg class="accordion-icon w-6 h-6 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div class="accordion-content px-8">
+                                <p class="text-slate-500 pb-4">Yes. You can pause your subscription if you have a slow month and resume whenever you have more development tasks. No hidden fees or exit penalties.</p>
+                            </div>
+                        </div>
+                        <div class="accordion-item bg-slate-50 dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-100 dark:border-slate-800">
+                            <button class="w-full flex items-center justify-between p-8 font-bold text-lg text-left" onclick="DevApp.toggleAccordion(this)">
+                                <span>What stack do you specialize in?</span>
+                                <svg class="accordion-icon w-6 h-6 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div class="accordion-content px-8">
+                                <p class="text-slate-500 pb-4">We are experts in the modern web: React/Next.js, Node.js, Python/Django, and Flutter for mobile. For design, we use Figma exclusively.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dynamic Content Section for Services -->
+        <section id="view-service-dev" class="page-view pt-32 pb-20">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="reveal active">
+                    <h2 class="text-7xl font-black mb-8 tracking-tighter">Fullstack<br><span class="text-primary-600">Engineering.</span></h2>
+                    <div class="grid lg:grid-cols-2 gap-20 items-center">
+                        <div class="space-y-8">
+                            <p class="text-xl text-slate-500 leading-relaxed">We build performant, type-safe, and scalable applications using the industry's most reliable technology patterns.</p>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-6 bg-slate-50 dark:bg-slate-900 rounded-2xl">
+                                    <div class="text-primary-600 font-black text-2xl mb-2">01</div>
+                                    <div class="font-bold text-sm">Microservices</div>
+                                </div>
+                                <div class="p-6 bg-slate-50 dark:bg-slate-900 rounded-2xl">
+                                    <div class="text-primary-600 font-black text-2xl mb-2">02</div>
+                                    <div class="font-bold text-sm">Real-time Data</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-primary-600 rounded-[3rem] p-12 text-white">
+                            <div class="font-black text-2xl mb-4">Core Principles</div>
+                            <ul class="space-y-4 font-bold opacity-80">
+                                <li class="flex items-center"><span class="w-2 h-2 bg-white rounded-full mr-3"></span> Automated Testing (95% coverage)</li>
+                                <li class="flex items-center"><span class="w-2 h-2 bg-white rounded-full mr-3"></span> CI/CD Continuous Delivery</li>
+                                <li class="flex items-center"><span class="w-2 h-2 bg-white rounded-full mr-3"></span> Security-First Approach</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRODUCT DESIGN VIEW -->
+        <section id="view-service-design" class="page-view pt-32 pb-20">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="reveal active mb-20">
+                    <h2 class="text-7xl font-black mb-8 tracking-tighter">Product<br><span class="text-indigo-600">Design.</span></h2>
+                    <p class="text-2xl text-slate-500 max-w-2xl leading-relaxed">We design products that people love to use. Form follows function, but beauty is a function in itself.</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="p-10 bg-indigo-50 dark:bg-indigo-950/30 rounded-[2.5rem] reveal">
+                        <h4 class="text-2xl font-black mb-4">UX Strategy</h4>
+                        <p class="text-sm text-slate-500">Mapping user journeys that reduce friction and increase conversion rates at every touchpoint.</p>
+                    </div>
+                    <div class="p-10 bg-slate-50 dark:bg-slate-900 rounded-[2.5rem] reveal">
+                        <h4 class="text-2xl font-black mb-4">Visual UI</h4>
+                        <p class="text-sm text-slate-500">Crafting high-fidelity interfaces that align perfectly with your brand identity and voice.</p>
+                    </div>
+                    <div class="p-10 bg-slate-50 dark:bg-slate-900 rounded-[2.5rem] reveal">
+                        <h4 class="text-2xl font-black mb-4">Prototypes</h4>
+                        <p class="text-sm text-slate-500">Rapid prototyping to test ideas and validate assumptions before a single line of code is written.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact-section" class="py-32">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="bg-slate-900 dark:bg-white rounded-[4rem] p-10 md:p-20 flex flex-col lg:flex-row gap-20 items-center overflow-hidden relative">
+                    <div class="absolute -top-10 -right-10 w-64 h-64 bg-primary-600 rounded-full blur-[100px] opacity-30"></div>
+                    
+                    <div class="relative z-10 lg:w-1/2">
+                        <h2 class="text-5xl md:text-7xl font-black text-white dark:text-slate-950 tracking-tighter mb-8 leading-tight">Ready to<br>innovate?</h2>
+                        <p class="text-slate-400 dark:text-slate-500 text-lg mb-12">Contact us today to schedule a technical discovery call. We typically respond in under 4 hours.</p>
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-full bg-white/10 dark:bg-slate-900/10 flex items-center justify-center text-white dark:text-slate-900">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+                            </div>
+                            <span class="text-xl font-bold text-white dark:text-slate-950">kimsan.sanboy@gmail.com</span>
+                        </div>
+                    </div>
+
+                    <div class="lg:w-1/2 w-full relative z-10">
+                        <form id="contact-form" class="space-y-4" onsubmit="DevApp.handleContact(event)">
+                            <div class="grid grid-cols-2 gap-4">
+                                <input required type="text" placeholder="Name" class="w-full p-6 bg-white/5 dark:bg-slate-100 border border-white/10 dark:border-slate-200 rounded-2xl text-white dark:text-slate-900 outline-none focus:border-primary-500 transition-all">
+                                <input required type="email" placeholder="Email" class="w-full p-6 bg-white/5 dark:bg-slate-100 border border-white/10 dark:border-slate-200 rounded-2xl text-white dark:text-slate-900 outline-none focus:border-primary-500 transition-all">
+                            </div>
+                            <textarea required rows="4" placeholder="Your Project Vision" class="w-full p-6 bg-white/5 dark:bg-slate-100 border border-white/10 dark:border-slate-200 rounded-2xl text-white dark:text-slate-900 outline-none focus:border-primary-500 transition-all"></textarea>
+                            <button class="w-full py-6 bg-primary-600 text-white font-black text-xl rounded-2xl hover:bg-primary-500 active:scale-95 transition-all shadow-2xl shadow-primary-500/30">Initiate Contact</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="bg-white dark:bg-slate-950 pt-24 pb-12">
+        <div class="max-w-7xl mx-auto px-4 border-t border-slate-100 dark:border-slate-900 pt-16">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-12 mb-20">
+                <div class="col-span-2 md:col-span-1">
+                    <div class="flex items-center mb-6">
+                        <div class="w-8 h-8 bg-primary-600 rounded flex items-center justify-center mr-3"><span class="text-white text-xs font-black">D.</span></div>
+                        <span class="text-xl font-black">KIMSAN</span>
+                    </div>
+                    <p class="text-slate-500 text-sm max-w-xs">Building high-fidelity digital infrastructure for the next generation of global brands.</p>
+                </div>
+                <div>
+                    <h6 class="font-black text-xs uppercase tracking-widest text-slate-400 mb-6">Resources</h6>
+                    <ul class="space-y-4 text-sm font-bold text-slate-500">
+                        <li><a href="#" class="hover:text-primary-600 transition-colors">Engineering Blog</a></li>
+                        <li><a href="#" class="hover:text-primary-600 transition-colors">Case Studies</a></li>
+                        <li><a href="#" class="hover:text-primary-600 transition-colors">Style Guide</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h6 class="font-black text-xs uppercase tracking-widest text-slate-400 mb-6">Platform</h6>
+                    <ul class="space-y-4 text-sm font-bold text-slate-500">
+                        <li><a href="#" onclick="DevApp.navigate('pricing')" class="hover:text-primary-600 transition-colors">Pricing</a></li>
+                        <li><a href="#" class="hover:text-primary-600 transition-colors">Partner Program</a></li>
+                        <li><a href="#" class="hover:text-primary-600 transition-colors">Careers</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h6 class="font-black text-xs uppercase tracking-widest text-slate-400 mb-6">Contact</h6>
+                    <ul class="space-y-4 text-sm font-bold text-slate-500">
+                        <li>Twitter / X</li>
+                        <li>GitHub</li>
+                        <li>LinkedIn</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row justify-between items-center text-xs font-bold text-slate-400">
+                <p>&copy; 2026 Development by <a href="https://t.me/kim_saa" class="hover:text-slate-900">KIMSAN.</a></p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a href="#" class="hover:text-slate-900">Privacy</a>
+                    <a href="#" class="hover:text-slate-900">Terms</a>
+                    <a href="#" class="hover:text-slate-900">Security</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Global UI Components -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black shadow-2xl transform translate-y-40 transition-all duration-500 opacity-0 pointer-events-none"></div>
+
+    <!-- MAIN APPLICATION LOGIC -->
+    <script>
+        /**
+         * DevStudio Modular Application Object
+         * Encapsulates state, navigation, and core functionality
+         */
+        const DevApp = {
+            state: {
+                currentView: 'home',
+                isDarkMode: false,
+                isMobileMenuOpen: false
+            },
+
+            init() {
+                this.initTheme();
+                this.initScrollListeners();
+                this.initRevealObserver();
+                this.initNavigation();
+                console.log("DevStudio Engine Initialized...");
+            },
+
+            // --- NAVIGATION ENGINE ---
+            navigate(viewId) {
+                if (this.state.isMobileMenuOpen) this.toggleMobileMenu();
+
+                const views = document.querySelectorAll('.page-view');
+                const target = document.getElementById(`view-${viewId}`);
+
+                if (!target) return;
+
+                // Simple Fade Sequence
+                views.forEach(v => {
+                    v.classList.remove('active');
+                });
+
+                target.classList.add('active');
+                this.state.currentView = viewId;
+                
+                // Update URL for deep linking
+                window.location.hash = viewId;
+                
+                // Reset scroll position
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Update active link styling
+                this.updateNavState();
+            },
+
+            updateNavState() {
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.toggle('text-primary-600', link.getAttribute('onclick').includes(this.state.currentView));
+                });
+            },
+
+            toggleMobileMenu() {
+                this.state.isMobileMenuOpen = !this.state.isMobileMenuOpen;
+                const overlay = document.getElementById('mobile-menu-overlay');
+                overlay.classList.toggle('active', this.state.isMobileMenuOpen);
+                document.body.style.overflow = this.state.isMobileMenuOpen ? 'hidden' : '';
+            },
+
+            scrollToContact() {
+                if (this.state.isMobileMenuOpen) this.toggleMobileMenu();
+                document.getElementById('contact-section').scrollIntoView({ behavior: 'smooth' });
+            },
+
+            // --- THEME ENGINE ---
+            initTheme() {
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                this.setTheme(savedTheme);
+                
+                document.getElementById('theme-btn').addEventListener('click', () => {
+                    const next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+                    this.setTheme(next);
+                });
+            },
+
+            setTheme(theme) {
+                const sun = document.getElementById('sun-icon');
+                const moon = document.getElementById('moon-icon');
+
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                    sun.classList.remove('hidden');
+                    moon.classList.add('hidden');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    sun.classList.add('hidden');
+                    moon.classList.remove('hidden');
+                }
+                localStorage.setItem('theme', theme);
+                this.state.isDarkMode = (theme === 'dark');
+            },
+
+            // --- UI INTERACTION ---
+            initScrollListeners() {
+                const nav = document.getElementById('main-nav');
+                window.addEventListener('scroll', () => {
+                    if (window.scrollY > 20) {
+                        nav.classList.add('nav-scrolled');
+                    } else {
+                        nav.classList.remove('nav-scrolled');
+                    }
+                });
+            },
+
+            initRevealObserver() {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('active');
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+            },
+
+            toggleAccordion(btn) {
+                const item = btn.closest('.accordion-item');
+                const isActive = item.classList.contains('active');
+                
+                // Close others in same group
+                document.querySelectorAll('.accordion-item').forEach(el => el.classList.remove('active'));
+                
+                if (!isActive) item.classList.add('active');
+            },
+
+            handleContact(e) {
+                e.preventDefault();
+                const form = e.target;
+                const btn = form.querySelector('button');
+                
+                btn.innerHTML = 'Sending...';
+                btn.disabled = true;
+
+                // Simulate Network Delay
+                setTimeout(() => {
+                    this.showToast('Message sent! Our engineers will contact you shortly.');
+                    form.reset();
+                    btn.innerHTML = 'Initiate Contact';
+                    btn.disabled = false;
+                }, 1500);
+            },
+
+            showToast(msg) {
+                const toast = document.getElementById('toast');
+                toast.innerText = msg;
+                toast.style.transform = 'translateY(0) translateX(-50%)';
+                toast.style.opacity = '1';
+
+                setTimeout(() => {
+                    toast.style.transform = 'translateY(40px) translateX(-50%)';
+                    toast.style.opacity = '0';
+                }, 4000);
+            },
+
+            initNavigation() {
+                // Deep linking check
+                const hash = window.location.hash.replace('#', '');
+                const validViews = ['home', 'pricing', 'about', 'service-dev', 'service-design'];
+                if (validViews.includes(hash)) {
+                    this.navigate(hash);
+                }
+            }
+        };
+
+        // Boot Application
+        window.addEventListener('DOMContentLoaded', () => DevApp.init());
+    </script>
+</body>
+</html>
